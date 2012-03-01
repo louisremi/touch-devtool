@@ -1,0 +1,102 @@
+<!DOCTYPE html5>
+<html>
+<head>
+<meta charset="UTF-8" />
+<style>
+body {
+	background: #eeeef0;
+	color: #666;
+	font-family: Arial, Helvetica, Liberation Sans, sans-serif;
+	font-size: .8em;
+}
+ul {
+	list-style-type: none;
+	margin-left: -2em;
+}
+li:before {
+	content: "‒ ";
+}
+.circle {
+	display: inline-block;
+	opacity: .4;
+	border-radius: 5px;
+}
+.blue {
+	width: 10px;
+	height: 10px;
+	background: #003;
+}
+.red, .green {
+	width: 8px;
+	height: 8px;
+}
+.red {
+	background: #300;
+}
+.green {
+	background: #030;
+}
+a {
+	color: inherit;
+}
+.by {
+	text-decoration: none;
+	font-weight: bold;
+}
+.bookmarklet {
+	font-size: 1.5em;
+	background: #333;
+	color: #eeeef0;
+	padding: .3em .5em;
+	border-radius: .1em;
+}
+</style>
+</head>
+<body>
+
+<h1>Touch Bookmarklet</h1>
+
+<p>Simulate touch events with a mouse.</p>
+
+<h2>Preparing your browser:</h2>
+
+<ul>
+	<li><b>Firefox</b>: Install the <a href="https://addons.mozilla.org/en-US/firefox/addon/touch-enabler/">Touch Enabler</a> addon and restart Firefox.</li>
+	<!--<li><b>Chrome</b>: Start your browser from the command line with the touch switch:
+		<ul>
+			<li>Ubuntu: <code>/opt/google/chrome/google-chrome --enable-touch-events</code></li>
+			<li>MacOS: <code>/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome --enable-touch-events</code></li>
+			<li>Windows: <code>chrome.exe --enable-touch-events</code></li>
+		</ul>
+	</li>-->
+	<li><b>Chrome:</b> <i>Not yet fully implemented</i>.</li>
+</ul>
+
+<h2>Usage:</h2>
+
+<ul>
+	<li>Add/Remove hovering fingers ( <span class="circle blue"></span> ): <kbd><kbd>Shift</kbd>+<kbd>Click</kbd></kbd></li>
+	<li>Drag a particular <span class="circle blue"></span> to simulate swiping with a single finger</li>
+	<li>Activate Swipe ( <span class="circle red"></span> ) and Rotate/Pinch ( <span class="circle green"></span> ) handles: <kbd>↓<kbd>Ctrl</kbd></kbd></li>
+	<li>Drag <span class="circle red"></span> to simulate swiping with all fingers</li>
+	<li>Drag <span class="circle green"></span> to simulate rotate/pinch with all fingers</li>
+</ul>
+
+<!--<h3>Limitations</h3>
+
+<p>
+	While using Swipe and Rotate/Pinch handles, the<br/>
+	<code>target</code> attribute of the touch events isn't updated.
+</p>-->
+
+<br/>
+
+<a class="bookmarklet" href='javascript:(function(k,g,h,o){function t(){this.list={}}function u(a,b){var e=d.cloneNode();this.centerX=a.clientX;this.centerY=a.clientY;e.style.left=this.centerX-11+"px";e.style.top=this.centerY-11+"px";e.className="tchPoint";this.id=e.id=b;this[0]=g.body.appendChild(e)}function v(a){var b=d.cloneNode(),e=d.cloneNode();b.style.background="#300";e.style.background="#030";b.style.width=b.style.height=e.style.width=e.style.height="16px";e.className=b.className="tchHandle";b.id="tchSwipe";e.id="tchPR";this[0]= g.body.appendChild(b);this[1]=g.body.appendChild(e);this.move(a);this.off()}for(var k=g.createElement("div").style,p=["O","ms","Webkit","Moz",""],q=p.length,m,r,s,c,l,n,j,d;q--;)if(r=p[q]+(p[q]?"Transform":"transform"),r in k){k=r;m=k.replace(/form/,"ition");break}d=g.createElement("div");d.style.position="fixed";d.style.display="block";d.style.visibility="visible";d.style.zIndex=999;d.style.margin=d.style.padding=0;d.style.width=d.style.height="20px";d.style.borderRadius="10px";d.style.boxShadow= "1px 1px 3px #300";d.style.background="#003";d.style.opacity=0.3;k={click:function(a){var b=a.target.className;a.shiftKey&&("tchPoint"==b?c.remove(a):"tchHandle"!=b&&c.add(a))},mousedown:function(a){var b=a.target.className;!a.shiftKey&&!a.ctrlKey&&"tchPoint"==b?(l=c.get(a).down(),c.handles&&c.handles.hide(),a.preventDefault()):a.ctrlKey&&"tchHandle"==b&&(j="tchSwipe"==a.target.id?[a.clientX,a.clientY]:[0,1],n=a.target.id,c.down(),a.preventDefault())},mouseup:function(a){var b=a.target.className; "tchPoint"==b&&l?(l.up(),l=o,c.handles&&(c.handles.move(c.center()),c.handles.show())):"tchHandle"==b&&(c.up(),a.ctrlKey||c.handles.off(),n=o,c.handles.move(c.handles.centerX,c.handles.centerY));a.preventDefault()},mousemove:function(a){var b,e;l?(l.move(a.clientX,a.clientY),a.preventDefault()):n&&("tchSwipe"==n?(b=a.clientX-j[0],e=a.clientY-j[1],c.moveBy(b,e),c.handles.move(a.clientX,a.clientY),j=[a.clientX,a.clientY]):(c.handles.moveRP(a.clientX,a.clientY),b=a.clientX-c.handles.centerX,e=a.clientY- c.handles.centerY,a=h.sqrt(b*b+e*e)/100,b=-h.atan2(b,e)+h.PI/2,c.rp(b-j[0],(a-j[1])/j[1]),j=[b,a]))},keydown:function(a){if(17==a.keyCode&&c.handles)c.handles.on()},keyup:function(a){17==a.keyCode&&c.handles&&!n&&c.handles.off()},selectstart:function(a){a.preventDefault()}};t.prototype={add:function(a){var b="tch"+h.round(1E6*h.random());this.list[b]=new u(a,b);a=this.length();2==a&&(this.handles=new v(this.center()));2<a&&this.handles.move(this.center())},remove:function(a){a=this.get(a);a.remove(); delete this.list[a.id];a=this.length();1==a&&(this.handles.remove(),this.handles=o);1<a&&this.handles.move(this.center())},get:function(a){return this.list[a.target&&a.target.id||a]},length:function(){return Object.keys(this.list).length},center:function(){var a=1E5,b=0,e=1E5,c=0,d,f;for(d in this.list)f=this.list[d],f.centerX>b&&(b=f.centerX),f.centerX<e&&(e=f.centerX),f.centerY>c&&(c=f.centerY),f.centerY<a&&(a=f.centerY);return[e+(b-e)/2,a+(c-a)/2]},down:function(){for(var a in this.list)this.list[a].down()}, up:function(){for(var a in this.list)this.list[a].up()},moveBy:function(a,b){var c,d;for(c in this.list)d=this.list[c],d.move(d.centerX+a,d.centerY+b)},rp:function(a,b){var c,d,i,f,g;for(c in this.list)d=this.list[c],i=d.centerX-this.handles.centerX,f=d.centerY-this.handles.centerY,g=-h.atan2(i,f)+h.PI/2+a,i=h.sqrt(i*i+f*f),i+=i*b,d.move(h.cos(g)*i+this.handles.centerX,h.sin(g)*i+this.handles.centerY)}};u.prototype={remove:function(){g.body.removeChild(this[0])},down:function(){this[0].style.left= this.centerX-10+"px";this[0].style.top=this.centerY-10+"px";this[0].style.boxShadow="none";this[0].style.opacity=0.5;this[0].style.zIndex=1E3;return this},up:function(){this[0].style.left=this.centerX-11+"px";this[0].style.top=this.centerY-11+"px";this[0].style.boxShadow="1px 1px 3px #300";this[0].style.opacity=0.3;this[0].style.zIndex=999},move:function(a,b){this.centerX=a;this.centerY=b;this[0].style.left=a-10+"px";this[0].style.top=b-10+"px"}};v.prototype={remove:function(){g.body.removeChild(this[0]); g.body.removeChild(this[1])},hide:function(){this[0].style.display=this[1].style.display="none"},show:function(){this[0].style.display=this[1].style.display="block"},move:function(a,b){a.length&&(b=a[1],a=a[0]);this.centerX=a;this.centerY=b;this[0].style.left=this.centerX-11+"px";this[0].style.top=this.centerY-11+"px";this[1].style.left=this.centerX+89+"px";this[1].style.top=this.centerY-11+"px"},moveRP:function(a,b){this[1].style.left=a-11+"px";this[1].style.top=b-11+"px"},on:function(){this[0].style.zIndex= this[1].style.zIndex=1E3;this[0].style.opacity=this[1].style.opacity=0.5;this[0].style[m]=this[1].style[m]="none"},off:function(){this[0].style.zIndex=this[1].style.zIndex=998;this[0].style.opacity=this[1].style.opacity=0.15;this[0].style[m]=this[1].style[m]="top .8s, left .8s"}};c=new t;for(s in k)g.addEventListener(s,k[s],!1)})(window,document,Math);'>Bookmark Me</a>
+
+<br/><br/><br/>
+
+by <a href="http://twitter.com/louis_remi">@louis_remi</a>
+
+<script src="../touch.bookmarklet.js"></script>
+</body>
+</html>
