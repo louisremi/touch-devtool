@@ -9,7 +9,7 @@ var div = document.createElement("div"),
 	listeners, type,
 	touchs,
 	movingTouch, movingHandle, prevData,
-	circle;
+	prepareEvent, tmpEvt, circle;
 
 // vendor prefix detection
 while ( i-- ) {
@@ -22,7 +22,7 @@ while ( i-- ) {
 }
 
 circle = document.createElement( "div" );
-circle.style.position = "fixed";
+circle.style.position = "absolute";
 circle.style.display = "block";
 circle.style.visibility = "visible";
 circle.style.zIndex = 999;
@@ -39,7 +39,7 @@ listeners = {
 			touch;
 
 		if ( e.shiftKey ) {
-			touchs.length() && ( touch = touchs.get( e.clientX, e.clientY ) ) ?
+			touchs.length() && ( touch = touchs.get( e.pageX, e.pageY ) ) ?
 				touchs.remove( touch.id ) :
 				touchs.add( e );
 		}
@@ -47,11 +47,14 @@ listeners = {
 
 	mousedown: function( e ) {
 		var touch,
-			className = e.target.className;
+			className = e.target.className,
+			_touchstart = "touchstart";
 
 		// touch point
-		if ( !e.shiftKey && !e.ctrlKey && ( touch = touchs.get( e.clientX, e.clientY ) ) ) {
+		if ( !e.shiftKey && !e.ctrlKey && ( touch = touchs.get( e.pageX, e.pageY ) ) ) {
+
 			movingTouch = touch.down();
+			movingTouch.cidTouch( _touchstart, e );
 
 			// hide handles while a single touch is being moved
 			touchs.handles && touchs.handles.hide();
@@ -61,10 +64,12 @@ listeners = {
 		// touch handle
 		} else if ( e.ctrlKey && className == "tchHandle" ) {
 			prevData = e.target.id == "tchSwipe" ?
-				[ e.clientX, e.clientY ] :
+				[ e.pageX, e.pageY ] :
 				[ 0, 1 ];
 			movingHandle = e.target.id;
+
 			touchs.down();
+			touchs.cidTouchs( _touchstart, e );
 
 			e.preventDefault();
 		}
@@ -72,22 +77,26 @@ listeners = {
 
 	mouseup: function( e ) {
 		var touch,
-			className = e.target.className;
+			className = e.target.className,
+			_touchend = "touchend";
 
 		// touch point
 		if ( movingTouch ) {
 			movingTouch.up();
+			movingTouch.cidTouch( _touchend, e );
 			movingTouch = undefined;
 
-			// update handle position and show them
+			// update handles positions and show them
 			touchs.handles && ( touchs.handles.move( touchs.center() ), touchs.handles.show() );
 
 		// touch handle
 		} else if ( movingHandle ) {
 			touchs.up();
+			touchs.cidTouchs( _touchend, e );
 			e.ctrlKey || touchs.handles.off();
 			movingHandle = undefined;
-			// reposition rotate/pinch handle
+
+			// update handles positions
 			touchs.handles.move( touchs.handles.centerX, touchs.handles.centerY );
 		}
 
@@ -96,11 +105,14 @@ listeners = {
 
 	mousemove: function( e ) {
 		var className = e.target.className,
-			dX, dY, tmpA, tmpS;
+			dX, dY, tmpA, tmpS,
+			_touchmove = "touchmove";
 
 		// touch point
 		if ( movingTouch ) {
-			movingTouch.move( e.clientX, e.clientY );
+			movingTouch.move( e.pageX, e.pageY );
+			movingTouch.cidTouch( _touchmove, e );
+
 			e.preventDefault();
 
 		// touch handle
@@ -108,20 +120,20 @@ listeners = {
 			// swipe handle
 			if ( movingHandle == "tchSwipe" ) {
 
-				dX = e.clientX - prevData[0];
-				dY = e.clientY - prevData[1];
+				dX = e.pageX - prevData[0];
+				dY = e.pageY - prevData[1];
 				touchs.moveBy( dX, dY );
-				touchs.handles.move( e.clientX, e.clientY );
+				touchs.handles.move( e.pageX, e.pageY );
 
-				prevData = [ e.clientX, e.clientY ];
+				prevData = [ e.pageX, e.pageY ];
 
 			// rotate / pinch handle
 			} else {
-				touchs.handles.moveRP( e.clientX, e.clientY );
+				touchs.handles.moveRP( e.pageX, e.pageY );
 
 				// scale relative to origin
-				dX = e.clientX - touchs.handles.centerX;
-				dY = e.clientY - touchs.handles.centerY;
+				dX = e.pageX - touchs.handles.centerX;
+				dY = e.pageY - touchs.handles.centerY;
 				tmpS = Math.sqrt( dX * dX + dY * dY ) / 100;
 
 				// angle relative to origin
@@ -134,6 +146,8 @@ listeners = {
 				);
 				prevData = [ tmpA, tmpS ];
 			}
+
+			touchs.cidTouchs( _touchmove, e );
 		}
 	},
 
@@ -265,7 +279,7 @@ Touchs.prototype = {
 		}
 	},
 
-	rp: function( angle, scale ) {//console.log( scale )
+	rp: function( angle, scale ) {
 		var id, point, dX, dY, hypotenuse, a;
 
 		for ( id in this.list ) {
@@ -277,10 +291,30 @@ Touchs.prototype = {
 			a = -Math.atan2( dX, dY ) + Math.PI/2 + angle;
 
 			hypotenuse = Math.sqrt( dX * dX + dY * dY );
-			//console.log( hypotenuse, hypotenuse * scale )
+
 			hypotenuse += hypotenuse * scale;
 
 			point.move( Math.cos( a ) * hypotenuse + this.handles.centerX, Math.sin( a ) * hypotenuse + this.handles.centerY );
+		}
+	},
+
+	createTouchList: function( type, e ) {
+		var tchs = [], id, i = 0;
+
+		// all touch points at once
+		for ( id in this.list ) {
+			tchs.push( this.list[ id ].createTouch( type, e, i++ ) );
+		}
+
+		return document.createTouchList( tchs );
+	},
+
+	cidTouchs: function( type, e ) {
+		var touchList = this.createTouchList( type, e ),
+			id;
+
+		for ( id in this.list ) {
+			this.list[ id ].cidTouch( type, e, touchList );
 		}
 	}
 };
@@ -290,8 +324,8 @@ Touchs.prototype = {
 function Touch( e, id ) {
 	var el = circle.cloneNode();
 
-	this.centerX = e.clientX;
-	this.centerY = e.clientY;
+	this.centerX = e.pageX;
+	this.centerY = e.pageY;
 	el.style.left = ( this.centerX - 11 ) + "px";
 	el.style.top = ( this.centerY - 11 ) + "px";
 
@@ -333,8 +367,83 @@ Touch.prototype = {
 		this[0].style.top = ( y - 10 ) + "px";
 	},
 
-	createTouch: function( e, id ) {
-		//return document.createTouch( window, document.elementFromPoint( this.centerX, this.centerY ) )
+	createTouch: function( type, e, id ) {
+
+		type == "touchstart" && ( this.target = document.elementFromPoint( this.centerX - scrollX, this.centerY - scrollY ) );
+
+		var created = document.createTouch(
+			// view
+			window,
+			// target
+			this.target,
+			// identifier
+			id || 0,
+			// pageX
+			this.centerX,
+			// pageY
+			this.centerY,
+			// screenX
+			this.centerX + e.screenX - e.pageX,
+			// screenY
+			this.centerY + e.screenY - e.pageY,
+			// clientX
+			this.centerX + e.clientX - e.pageX,
+			// clientY
+			this.centerY + e.clientY - e.pageY
+		);
+
+		return created;
+	},
+
+	createTouchList: function( type, e ) {
+		return document.createTouchList( [ this.createTouch( type, e ) ] );
+	},
+
+	// create, init and dispatch a touch event on the touch target
+	cidTouch: function( type, e, touchList ) {
+		// if the touchList is undefined, it will contain only this point
+		touchList || ( touchList = this.createTouchList( type, e ) );
+
+		var targetTouches = [],
+			evt = document.createEvent( "touchevent" ),
+			l = touchList.length, i = -1;
+
+		// filter target touches
+		while ( ++i < l ) {
+			// targetTouches share the same target
+			if ( touchList.item(i).target == this[0] ) {
+				targetTouches.push( touchList.item(i) );
+			}
+		}
+		targetTouches = document.createTouchList( targetTouches );
+
+		evt.initTouchEvent(
+			// event type
+			type,
+			//  can bubble
+			true,
+			// cancelable
+			true,
+			// AbstractView
+			window,
+			// detail
+			0,
+			// keys
+			e.ctrlKey,
+			e.altKey,
+			e.shiftKey,
+			e.metaKey,
+			// touches
+			touchList,
+			// target touches
+			targetTouches,
+			// changed touches
+			touchList
+		);
+
+		this.target.dispatchEvent( evt );
+
+		type == "touchend" && ( this.target = undefined );
 	}
 };
 
