@@ -139,13 +139,6 @@ listeners = {
 		}
 	},
 
-	keypress: function( e ) {
-		if ( e.charCode == 0 && e.shiftKey ) {
-			touchs.remove();
-			e.preventDefault();
-		}
-	},
-
 	mousedown: function( e ) {
 		var touch,
 			className = e.target.className,
@@ -252,14 +245,21 @@ listeners = {
 		}
 	},
 
+	keypress: function( e ) {
+		if ( e.charCode == 0 && e.shiftKey ) {
+			touchs.remove();
+			e.preventDefault();
+		}
+	},
+
 	keydown: function( e ) {
-		if ( e.keyCode == 17 && touchs.handles ) {
+		if ( ( e.keyCode == 17 || e.keyCode == 224 ) && touchs.handles ) {
 			touchs.handles.on();
 		}
 	},
 
 	keyup: function( e ) {
-		if ( e.keyCode == 17 && touchs.handles && !movingHandle ) {
+		if ( ( e.keyCode == 17 || e.keyCode == 224 ) && touchs.handles && !movingHandle ) {
 			touchs.handles.off();
 		}
 	},
