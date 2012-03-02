@@ -152,7 +152,7 @@ listeners = {
 			_touchstart = "touchstart";
 
 		// touch point
-		if ( !e.shiftKey && !e.ctrlKey && ( touch = touchs.get( e.pageX, e.pageY ) ) ) {
+		if ( !e.shiftKey && !e.ctrlKey && !e.metaKey && ( touch = touchs.get( e.pageX, e.pageY ) ) ) {
 
 			movingTouch = touch.down();
 			movingTouch.triggerTouch( _touchstart, e );
@@ -163,7 +163,7 @@ listeners = {
 			e.preventDefault();
 
 		// touch handle
-		} else if ( e.ctrlKey && className == "tchHandle" ) {
+		} else if ( ( e.ctrlKey || e.metaKey )  && className == "tchHandle" ) {
 			prevData = e.target.id == "tchSwipe" ?
 				[ e.pageX, e.pageY ] :
 				[ 0, 1 ];
@@ -194,7 +194,7 @@ listeners = {
 		} else if ( movingHandle ) {
 			touchs.up();
 			touchs.triggerTouchs( _touchend, e );
-			e.ctrlKey || touchs.handles.off();
+			e.ctrlKey || e.metaKey || touchs.handles.off();
 			movingHandle = undefined;
 
 			// update handles positions
