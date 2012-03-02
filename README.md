@@ -13,11 +13,11 @@ Addons for those browsers will follow, stay tuned.
 Usage:
 ------
 
-- Add/Remove an hovering finger ( ● ): Shift+Click
-- Drag a particular ● to simulate swiping with a single finger
-- Activate Swipe ( red ● ) and Rotate/Pinch ( green ● ) handles: ↓Ctrl
-- Drag the red ● to simulate swiping with all fingers
-- Drag the green ● to simulate rotate/pinch with all fingers
+- Add/Remove an hovering finger ( ⬤ ): Shift+Click
+- Drag a particular ⬤ to simulate swiping with a single finger
+- Activate Swipe ( red ⬤ ) and Rotate/Pinch ( green ⬤ ) handles: ↓Ctrl
+- Drag the red ⬤ to simulate swiping with all fingers
+- Drag the green ⬤ to simulate rotate/pinch with all fingers
 - Remove everything: Shift+Escape
 
 Credits
