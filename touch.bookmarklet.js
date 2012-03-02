@@ -4,21 +4,115 @@ var div = document.createElement("div"),
 	divStyle = div.style,
 	prefixes = ["O","ms","Webkit","Moz",""],
 	i = prefixes.length,
-	_Transform = "Transform",
-	transform, transition, tmp,
+	_Transition = "Transition",
+	transition, tmp,
 	listeners, type,
 	touchs,
 	movingTouch, movingHandle, prevData,
-	prepareEvent, tmpEvt, circle;
+	prepareEvent, createTouch, createTouchList,
+	circle;
 
 // vendor prefix detection
 while ( i-- ) {
-	tmp = prefixes[i] + ( prefixes[i] ? _Transform : _Transform.toLowerCase() );
+	tmp = prefixes[i] + ( prefixes[i] ? _Transition : _Transition.toLowerCase() );
 	if ( tmp in divStyle ) {
-		transform = tmp;
-		transition = transform.replace(/form/, "ition");
+		transition = tmp;
 		break;
 	}
+}
+
+// emulate document.createTouch & document.createTouchList if necessary
+createTouch = document.createTouch || document.createTouch ?
+	// we can't do `createTouch = document.createTouch`or we get "Illegal operation on WrappedNative prototype object"
+	function() { return document.createTouch.apply( document, arguments ); } :
+	function( view, target, id, pageX, pageY, screenX, screenY, clientX, clientY ) {
+		return {
+			identifier: id,
+			target: target,
+			screenX: screenX,
+			screenY: screenY,
+			clientX: clientX,
+			clientY: clientY,
+			pageX: pageX,
+			pageY: pageY
+		};
+	};
+createTouchList = document.createTouchList ?
+	function( touchArray ) { return document.createTouchList( touchArray ); } :
+	function( touchArray ) {
+		touchArray.identifiedTouch = function( id, i ) {
+			i = this.length;
+			while ( i-- ) {
+				if ( this[i].identifier == id ) {
+					return this[i];
+				}
+			}
+		};
+		return touchArray;
+	};
+
+// Determine how touch events should be prepared
+try {
+	tmp = document.createEvent( "touchevent" );
+	// Chrome will throw on this step
+	tmp.initTouchEvent;
+
+	// Firefox way
+	prepareEvent = function( type, e, touches, targetTouches ) {
+		var evt = document.createEvent( "touchevent" );
+
+		evt.initTouchEvent(
+			// event type
+			type,
+			//  can bubble
+			true,
+			// cancelable
+			true,
+			// AbstractView
+			window,
+			// detail
+			0,
+			// keys
+			e.ctrlKey,
+			e.altKey,
+			e.shiftKey,
+			e.metaKey,
+			// touches
+			touches,
+			// target touches
+			targetTouches,
+			// changed touches
+			touches
+		);
+
+		return evt;
+	};
+
+} catch(e) {
+	// Chrome Way
+	prepareEvent = function( type, e, touches, targetTouches ) {
+		var evt = document.createEvent( "HTMLEvents" );
+
+		evt.initEvent(
+			// event type
+			type,
+			//  can bubble
+			true,
+			// cancelable
+			true
+		);
+
+		evt.eventName = type;
+		evt.touches = touches;
+		evt.targetTouches = targetTouches;
+		evt.changedTouches = touches;
+		evt.altKey = e.altKey;
+		evt.metaKey = e.metaKey;
+		evt.ctrlKey = e.ctrlKey;
+		evt.shiftKey = e.shiftKey;
+
+		return evt;
+	};
 }
 
 circle = document.createElement( "div" );
@@ -45,6 +139,13 @@ listeners = {
 		}
 	},
 
+	keypress: function( e ) {
+		if ( e.charCode == 0 && e.shiftKey ) {
+			touchs.remove();
+			e.preventDefault();
+		}
+	},
+
 	mousedown: function( e ) {
 		var touch,
 			className = e.target.className,
@@ -54,7 +155,7 @@ listeners = {
 		if ( !e.shiftKey && !e.ctrlKey && ( touch = touchs.get( e.pageX, e.pageY ) ) ) {
 
 			movingTouch = touch.down();
-			movingTouch.cidTouch( _touchstart, e );
+			movingTouch.triggerTouch( _touchstart, e );
 
 			// hide handles while a single touch is being moved
 			touchs.handles && touchs.handles.hide();
@@ -69,7 +170,7 @@ listeners = {
 			movingHandle = e.target.id;
 
 			touchs.down();
-			touchs.cidTouchs( _touchstart, e );
+			touchs.triggerTouchs( _touchstart, e );
 
 			e.preventDefault();
 		}
@@ -83,7 +184,7 @@ listeners = {
 		// touch point
 		if ( movingTouch ) {
 			movingTouch.up();
-			movingTouch.cidTouch( _touchend, e );
+			movingTouch.triggerTouch( _touchend, e );
 			movingTouch = undefined;
 
 			// update handles positions and show them
@@ -92,7 +193,7 @@ listeners = {
 		// touch handle
 		} else if ( movingHandle ) {
 			touchs.up();
-			touchs.cidTouchs( _touchend, e );
+			touchs.triggerTouchs( _touchend, e );
 			e.ctrlKey || touchs.handles.off();
 			movingHandle = undefined;
 
@@ -111,7 +212,7 @@ listeners = {
 		// touch point
 		if ( movingTouch ) {
 			movingTouch.move( e.pageX, e.pageY );
-			movingTouch.cidTouch( _touchmove, e );
+			movingTouch.triggerTouch( _touchmove, e );
 
 			e.preventDefault();
 
@@ -147,7 +248,7 @@ listeners = {
 				prevData = [ tmpA, tmpS ];
 			}
 
-			touchs.cidTouchs( _touchmove, e );
+			touchs.triggerTouchs( _touchmove, e );
 		}
 	},
 
@@ -192,14 +293,20 @@ Touchs.prototype = {
 	},
 
 	remove: function( e ) {
-		var touch = this.get( e ),
-			length;
+		var touchs = e ?
+				// if an event is specified, remove a single point
+				{a: this.get( e ) } :
+				// without arguments, all points are removed from the list
+				this.list,
+			id;
 
-		touch.remove();
-		delete this.list[ touch.id ];
+		for ( id in touchs ) {
+			touchs[ id ].remove();
+			delete this.list[ touchs[ id ].id ];
+		}
+
 		length = this.length();
-
-		if ( length == 1 ) {
+		if ( length < 2 ) {
 			this.handles.remove();
 			this.handles = undefined;
 		}
@@ -213,12 +320,10 @@ Touchs.prototype = {
 		if ( y ) {
 			// touch points have pointerEvents == "none" and are thus invisible to document.elementFromPoint
 			// we have to do that manually
-			var ids = Object.keys( this.list ),
-				i = ids.length,
-				touch;
+			var id,	touch;
 
-			while ( i-- ) {
-				touch = this.list[ ids[i] ];
+			for ( id in this.list ) {
+				touch = this.list[ id ];
 				if ( x < touch.centerX + 11 && x > touch.centerX - 11 && y < touch.centerY + 11 && y > touch.centerY - 11 ) {
 					return touch;
 				}
@@ -298,23 +403,23 @@ Touchs.prototype = {
 		}
 	},
 
-	createTouchList: function( type, e ) {
+	touchList: function( type, e ) {
 		var tchs = [], id, i = 0;
 
 		// all touch points at once
 		for ( id in this.list ) {
-			tchs.push( this.list[ id ].createTouch( type, e, i++ ) );
+			tchs.push( this.list[ id ].touch( type, e, i++ ) );
 		}
 
-		return document.createTouchList( tchs );
+		return createTouchList( tchs );
 	},
 
-	cidTouchs: function( type, e ) {
-		var touchList = this.createTouchList( type, e ),
+	triggerTouchs: function( type, e ) {
+		var touchList = this.touchList( type, e ),
 			id;
 
 		for ( id in this.list ) {
-			this.list[ id ].cidTouch( type, e, touchList );
+			this.list[ id ].triggerTouch( type, e, touchList );
 		}
 	}
 };
@@ -367,11 +472,11 @@ Touch.prototype = {
 		this[0].style.top = ( y - 10 ) + "px";
 	},
 
-	createTouch: function( type, e, id ) {
+	touch: function( type, e, id ) {
 
 		type == "touchstart" && ( this.target = document.elementFromPoint( this.centerX - scrollX, this.centerY - scrollY ) );
 
-		var created = document.createTouch(
+		var created = createTouch(
 			// view
 			window,
 			// target
@@ -395,53 +500,28 @@ Touch.prototype = {
 		return created;
 	},
 
-	createTouchList: function( type, e ) {
-		return document.createTouchList( [ this.createTouch( type, e ) ] );
+	touchList: function( type, e ) {
+		return createTouchList( [ this.touch( type, e ) ] );
 	},
 
 	// create, init and dispatch a touch event on the touch target
-	cidTouch: function( type, e, touchList ) {
+	triggerTouch: function( type, e, touchList ) {
 		// if the touchList is undefined, it will contain only this point
-		touchList || ( touchList = this.createTouchList( type, e ) );
+		touchList || ( touchList = this.touchList( type, e ) );
 
 		var targetTouches = [],
-			evt = document.createEvent( "touchevent" ),
 			l = touchList.length, i = -1;
 
 		// filter target touches
 		while ( ++i < l ) {
 			// targetTouches share the same target
-			if ( touchList.item(i).target == this[0] ) {
-				targetTouches.push( touchList.item(i) );
+			if ( touchList[i].target == this.target ) {
+				targetTouches.push( touchList[i] );
 			}
 		}
-		targetTouches = document.createTouchList( targetTouches );
+		targetTouches = createTouchList( targetTouches );
 
-		evt.initTouchEvent(
-			// event type
-			type,
-			//  can bubble
-			true,
-			// cancelable
-			true,
-			// AbstractView
-			window,
-			// detail
-			0,
-			// keys
-			e.ctrlKey,
-			e.altKey,
-			e.shiftKey,
-			e.metaKey,
-			// touches
-			touchList,
-			// target touches
-			targetTouches,
-			// changed touches
-			touchList
-		);
-
-		this.target.dispatchEvent( evt );
+		this.target.dispatchEvent( prepareEvent( type, e, touchList, targetTouches ) );
 
 		type == "touchend" && ( this.target = undefined );
 	}
