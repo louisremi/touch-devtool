@@ -139,20 +139,13 @@ listeners = {
 		}
 	},
 
-	keypress: function( e ) {
-		if ( e.charCode == 0 && e.shiftKey ) {
-			touchs.remove();
-			e.preventDefault();
-		}
-	},
-
 	mousedown: function( e ) {
 		var touch,
 			className = e.target.className,
 			_touchstart = "touchstart";
 
 		// touch point
-		if ( !e.shiftKey && !e.ctrlKey && ( touch = touchs.get( e.pageX, e.pageY ) ) ) {
+		if ( !e.shiftKey && !e.ctrlKey && !e.metaKey && ( touch = touchs.get( e.pageX, e.pageY ) ) ) {
 
 			movingTouch = touch.down();
 			movingTouch.triggerTouch( _touchstart, e );
@@ -163,7 +156,7 @@ listeners = {
 			e.preventDefault();
 
 		// touch handle
-		} else if ( e.ctrlKey && className == "tchHandle" ) {
+		} else if ( ( e.ctrlKey || e.metaKey )  && className == "tchHandle" ) {
 			prevData = e.target.id == "tchSwipe" ?
 				[ e.pageX, e.pageY ] :
 				[ 0, 1 ];
@@ -194,7 +187,7 @@ listeners = {
 		} else if ( movingHandle ) {
 			touchs.up();
 			touchs.triggerTouchs( _touchend, e );
-			e.ctrlKey || touchs.handles.off();
+			e.ctrlKey || e.metaKey || touchs.handles.off();
 			movingHandle = undefined;
 
 			// update handles positions
@@ -252,14 +245,21 @@ listeners = {
 		}
 	},
 
+	keypress: function( e ) {
+		if ( e.charCode == 0 && e.shiftKey ) {
+			touchs.remove();
+			e.preventDefault();
+		}
+	},
+
 	keydown: function( e ) {
-		if ( e.keyCode == 17 && touchs.handles ) {
+		if ( ( e.keyCode == 17 || e.keyCode == 224 ) && touchs.handles ) {
 			touchs.handles.on();
 		}
 	},
 
 	keyup: function( e ) {
-		if ( e.keyCode == 17 && touchs.handles && !movingHandle ) {
+		if ( ( e.keyCode == 17 || e.keyCode == 224 ) && touchs.handles && !movingHandle ) {
 			touchs.handles.off();
 		}
 	},
@@ -427,7 +427,7 @@ Touchs.prototype = {
 // -- Touch -------------------------------------------------
 
 function Touch( e, id ) {
-	var el = circle.cloneNode();
+	var el = circle.cloneNode( false );
 
 	this.centerX = e.pageX;
 	this.centerY = e.pageY;
@@ -530,8 +530,8 @@ Touch.prototype = {
 // -- Handles -----------------------------------------------
 
 function Handles( pos ) {
-	var sHandle = circle.cloneNode(),
-		rpHandle = circle.cloneNode();
+	var sHandle = circle.cloneNode( false ),
+		rpHandle = circle.cloneNode( false );
 
 	sHandle.style.background = "#300";
 	rpHandle.style.background = "#030";
