@@ -427,7 +427,7 @@ Touchs.prototype = {
 // -- Touch -------------------------------------------------
 
 function Touch( e, id ) {
-	var el = circle.cloneNode();
+	var el = circle.cloneNode( false );
 
 	this.centerX = e.pageX;
 	this.centerY = e.pageY;
