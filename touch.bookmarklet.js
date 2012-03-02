@@ -530,8 +530,8 @@ Touch.prototype = {
 // -- Handles -----------------------------------------------
 
 function Handles( pos ) {
-	var sHandle = circle.cloneNode(),
-		rpHandle = circle.cloneNode();
+	var sHandle = circle.cloneNode( false ),
+		rpHandle = circle.cloneNode( false );
 
 	sHandle.style.background = "#300";
 	rpHandle.style.background = "#030";
