@@ -204,7 +204,11 @@ listeners = {
 				points.trigger( _touchend, e );
 			}
 
-			e.ctrlKey || e.metaKey || points.handles.draggable( false );
+			if ( !e.ctrlKey && !e.metaKey ) {
+				points.handles.draggable( false );
+				// rotate/pinch handle should be restored back to its initial position after use
+				points.handles.move( points.handles.centerX, points.handles.centerY );
+			}
 
 			// draggedPoint shouldn't be switched to undefined here, because click events happens after mouseup
 			// this would create a new point everytime the handle is released
@@ -291,6 +295,7 @@ listeners = {
 	keyup: function( e ) {
 		if ( ( e.keyCode == 17 || e.keyCode == 224 ) && points.handles && !draggedHandle ) {
 			points.handles.draggable( false );
+			points.handles.move( points.handles.centerX, points.handles.centerY );
 
 			preventDefault(e);
 		}
