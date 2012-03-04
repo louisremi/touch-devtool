@@ -21,30 +21,31 @@ ul {
 li:before {
 	content: "‒ ";
 }
+li {
+	line-height: 1.2em;
+}
 .circle {
-	display: inline-block;
 	opacity: .4;
-	border-radius: 5px;
+	font-size: 2em;
+}
+kbd {
+	font-style: normal;
 }
 .blue {
-	width: 10px;
-	height: 10px;
-	background: #003;
+	color: #003;
 }
 .red, .green {
-	width: 8px;
-	height: 8px;
 }
 .red {
-	background: #300;
+	color: #300;
 }
 .green {
-	background: #030;
+	color: #030;
 }
 a {
 	color: inherit;
 }
-.by, .bookmarklet, .github {
+#bookmarklet, #github {
 	text-decoration: none;
 	font-weight: bold;
 }
@@ -53,13 +54,13 @@ a {
 	color: #eeeef0;
 	box-shadow: 0 0 3px #333;
 }
-.bookmarklet {
+#bookmarklet {
 	font-size: 1.5em;
 	padding: .3em .5em;
 	border-radius: .1em;
 }
 
-.github {
+#github {
 	position: fixed;
 	top: 65px;
 	right: -50px;
@@ -85,23 +86,27 @@ a {
 <h2>Usage:</h2>
 
 <ul>
-	<li>Add/Remove an <i>hovering finger</i> ( <span class="circle blue"></span> ): <kbd><kbd>Shift</kbd>+<kbd>Click</kbd></kbd></li>
-	<li>Drag a particular <span class="circle blue"></span> to simulate swiping with a single finger</li>
-	<li>Activate Swipe ( <span class="circle red"></span> ) and Rotate/Pinch ( <span class="circle green"></span> ) handles: <kbd>↓<kbd>Ctrl</kbd></kbd> or <kbd>↓<kbd>Cmd</kbd></kbd></li>
-	<li>Drag <span class="circle red"></span> to simulate swiping with all fingers</li>
-	<li>Drag <span class="circle green"></span> to simulate rotate/pinch with all fingers</li>
-	<li>Remove everything: <kbd><kbd>Shift</kbd>+<kbd>Escape</kbd></kbd></li>
+	<li>Add/Remove a touch point: <kbd><kbd>Shift</kbd>+<kbd>Click</kbd></kbd></li>
+	<li>Simulate swipe with a single touch point: <kbd><kbd>Drag</kbd> <kbd><span class="circle blue">⬤</span></kbd></kbd></li>
+	<li>Simulate swipe with all touch points:  <kbd><kbd>Ctrl</kbd>+<kbd>Drag</kbd> <kbd><span class="circle red">⬤</span></kbd></kbd></li>
+	<li>Simulate rotate/pinch with all touch points:  <kbd><kbd>Ctrl</kbd>+<kbd>Drag</kbd> <kbd><span class="circle green">⬤</span></kbd></kbd></li>
+	<li>Move a touch points or all touch points: <kbd>(<kbd>Ctrl</kbd>+)<kbd>Shift</kbd>+<kbd>Drag</kbd> <kbd><span class="circle blue">⬤</span></kbd><kbd class="circle red">⬤</kbd><kbd class="circle green">⬤</kbd></kbd></li>
+	<li>Remove all touch points: <kbd><kbd>Shift</kbd>+<kbd>Escape</kbd></kbd></li>
 </ul>
+<p><em>Use <kbd>Cmd</kbd> instead of <kbd>Ctrl</kbd> on a Mac.</em></p>
 
 <br/>
 
-<p><a class="bookmarklet inverted" href='javascript:(function(u,d,h,n){function v(){this.list={}}function w(a,b){var e=f.cloneNode(!1);this.centerX=a.pageX;this.centerY=a.pageY;e.style.left=this.centerX-11+"px";e.style.top=this.centerY-11+"px";e.style.pointerEvents="none";e.className="tchPoint";this.id=e.id=b;this[0]=d.body.appendChild(e)}function x(a){var b=f.cloneNode(!1),e=f.cloneNode(!1);b.style.background="#300";e.style.background="#030";b.style.width=b.style.height=e.style.width=e.style.height="16px";e.className=b.className="tchHandle";b.id= "tchSwipe";e.id="tchPR";this[0]=d.body.appendChild(b);this[1]=d.body.appendChild(e);this.move(a);this.off()}for(var o=d.createElement("div").style,q=["O","ms","Webkit","Moz",""],r=q.length,l,m,s,c,g,k,i,t,y,p,f;r--;)if(m=q[r]+(q[r]?"Transition":"transition"),m in o){l=m;break}y=d.createTouch||d.createTouch?function(){return d.createTouch.apply(d,arguments)}:function(a,b,e,j,z,c,d,f,h){return{identifier:e,target:b,screenX:c,screenY:d,clientX:f,clientY:h,pageX:j,pageY:z}};p=d.createTouchList?function(a){return d.createTouchList(a)}: function(a){a.identifiedTouch=function(a,e){for(e=this.length;e--;)if(this[e].identifier==a)return this[e]};return a};try{m=d.createEvent("touchevent"),m.initTouchEvent,t=function(a,b,e,j){var c=d.createEvent("touchevent");c.initTouchEvent(a,!0,!0,u,0,b.ctrlKey,b.altKey,b.shiftKey,b.metaKey,e,j,e);return c}}catch(A){t=function(a,b,e,j){var c=d.createEvent("HTMLEvents");c.initEvent(a,!0,!0);c.eventName=a;c.touches=e;c.targetTouches=j;c.changedTouches=e;c.altKey=b.altKey;c.metaKey=b.metaKey;c.ctrlKey= b.ctrlKey;c.shiftKey=b.shiftKey;return c}}f=d.createElement("div");f.style.position="absolute";f.style.display="block";f.style.visibility="visible";f.style.zIndex=999;f.style.margin=f.style.padding=0;f.style.width=f.style.height="20px";f.style.borderRadius="10px";f.style.boxShadow="1px 1px 3px #333";f.style.background="#003";f.style.opacity=0.3;o={click:function(a){var b;a.shiftKey&&(c.length()&&(b=c.get(a.pageX,a.pageY))?c.remove(b.id):c.add(a))},mousedown:function(a){var b,e=a.target.className; if(!a.shiftKey&&!a.ctrlKey&&!a.metaKey&&(b=c.get(a.pageX,a.pageY)))g=b.down(),g.triggerTouch("touchstart",a),c.handles&&c.handles.hide(),a.preventDefault();else if((a.ctrlKey||a.metaKey)&&"tchHandle"==e)i="tchSwipe"==a.target.id?[a.pageX,a.pageY]:[0,1],k=a.target.id,c.down(),c.triggerTouchs("touchstart",a),a.preventDefault()},mouseup:function(a){g?(g.up(),g.triggerTouch("touchend",a),g=n,c.handles&&(c.handles.move(c.center()),c.handles.show())):k&&(c.up(),c.triggerTouchs("touchend",a),a.ctrlKey|| a.metaKey||c.handles.off(),k=n,c.handles.move(c.handles.centerX,c.handles.centerY));a.preventDefault()},mousemove:function(a){var b,e,j;g?(g.move(a.pageX,a.pageY),g.triggerTouch("touchmove",a),a.preventDefault()):k&&("tchSwipe"==k?(b=a.pageX-i[0],e=a.pageY-i[1],c.moveBy(b,e),c.handles.move(a.pageX,a.pageY),i=[a.pageX,a.pageY]):(c.handles.moveRP(a.pageX,a.pageY),b=a.pageX-c.handles.centerX,e=a.pageY-c.handles.centerY,j=h.sqrt(b*b+e*e)/100,b=-h.atan2(b,e)+h.PI/2,c.rp(b-i[0],(j-i[1])/i[1]),i=[b,j]), c.triggerTouchs("touchmove",a))},keypress:function(a){0==a.charCode&&a.shiftKey&&(c.remove(),a.preventDefault())},keydown:function(a){if((17==a.keyCode||224==a.keyCode)&&c.handles)c.handles.on()},keyup:function(a){(17==a.keyCode||224==a.keyCode)&&c.handles&&!k&&c.handles.off()},selectstart:function(a){a.preventDefault()}};v.prototype={add:function(a){var b="tch"+h.round(1E6*h.random());this.list[b]=new w(a,b);a=this.length();2==a&&(this.handles=new x(this.center()));2<a&&this.handles.move(this.center())}, remove:function(a){var a=a?{a:this.get(a)}:this.list,b;for(b in a)a[b].remove(),delete this.list[a[b].id];length=this.length();2>length&&(this.handles.remove(),this.handles=n);1<length&&this.handles.move(this.center())},get:function(a,b){if(b){var e,c;for(e in this.list)if(c=this.list[e],a<c.centerX+11&&a>c.centerX-11&&b<c.centerY+11&&b>c.centerY-11)return c}else return this.list[a.target&&a.target.id||a]},length:function(){return Object.keys(this.list).length},center:function(){var a=1E5,b=0,e=1E5, c=0,d,f;for(d in this.list)f=this.list[d],f.centerX>b&&(b=f.centerX),f.centerX<e&&(e=f.centerX),f.centerY>c&&(c=f.centerY),f.centerY<a&&(a=f.centerY);return[e+(b-e)/2,a+(c-a)/2]},down:function(){for(var a in this.list)this.list[a].down()},up:function(){for(var a in this.list)this.list[a].up()},moveBy:function(a,b){var e,c;for(e in this.list)c=this.list[e],c.move(c.centerX+a,c.centerY+b)},rp:function(a,b){var c,f,d,g,i;for(c in this.list)f=this.list[c],d=f.centerX-this.handles.centerX,g=f.centerY- this.handles.centerY,i=-h.atan2(d,g)+h.PI/2+a,d=h.sqrt(d*d+g*g),d+=d*b,f.move(h.cos(i)*d+this.handles.centerX,h.sin(i)*d+this.handles.centerY)},touchList:function(a,b){var c=[],d,f=0;for(d in this.list)c.push(this.list[d].touch(a,b,f++));return p(c)},triggerTouchs:function(a,b){var c=this.touchList(a,b),d;for(d in this.list)this.list[d].triggerTouch(a,b,c)}};w.prototype={remove:function(){d.body.removeChild(this[0])},down:function(){this[0].style.left=this.centerX-10+"px";this[0].style.top=this.centerY- 10+"px";this[0].style.boxShadow="none";this[0].style.opacity=0.5;this[0].style.zIndex=1E3;return this},up:function(){this[0].style.left=this.centerX-11+"px";this[0].style.top=this.centerY-11+"px";this[0].style.boxShadow="1px 1px 3px #300";this[0].style.opacity=0.3;this[0].style.zIndex=999},move:function(a,b){this.centerX=a;this.centerY=b;this[0].style.left=a-10+"px";this[0].style.top=b-10+"px"},touch:function(a,b,c){"touchstart"==a&&(this.target=d.elementFromPoint(this.centerX-scrollX,this.centerY- scrollY));return y(u,this.target,c||0,this.centerX,this.centerY,this.centerX+b.screenX-b.pageX,this.centerY+b.screenY-b.pageY,this.centerX+b.clientX-b.pageX,this.centerY+b.clientY-b.pageY)},touchList:function(a,b){return p([this.touch(a,b)])},triggerTouch:function(a,b,c){c||(c=this.touchList(a,b));for(var d=[],f=c.length,g=-1;++g<f;)c[g].target==this.target&&d.push(c[g]);d=p(d);this.target.dispatchEvent(t(a,b,c,d));"touchend"==a&&(this.target=n)}};x.prototype={remove:function(){d.body.removeChild(this[0]); d.body.removeChild(this[1])},hide:function(){this[0].style.display=this[1].style.display="none"},show:function(){this[0].style.display=this[1].style.display="block"},move:function(a,b){a.length&&(b=a[1],a=a[0]);this.centerX=a;this.centerY=b;this[0].style.left=this.centerX-11+"px";this[0].style.top=this.centerY-11+"px";this[1].style.left=this.centerX+89+"px";this[1].style.top=this.centerY-11+"px"},moveRP:function(a,b){this[1].style.left=a-11+"px";this[1].style.top=b-11+"px"},on:function(){this[0].style.zIndex= this[1].style.zIndex=1E3;this[0].style.opacity=this[1].style.opacity=0.5;this[0].style[l]=this[1].style[l]="none"},off:function(){this[0].style.zIndex=this[1].style.zIndex=998;this[0].style.opacity=this[1].style.opacity=0.15;this[0].style[l]=this[1].style[l]="top .8s, left .8s"}};c=new v;for(s in o)d.addEventListener(s,o[s],!1)})(window,document,Math);'>Touch Bookmarklet</a></p>
+<p><a id="bookmarklet" class="inverted" href='javascript:(function(w,e,h,m){function x(){this.list={}}function y(a,b){var c=g.cloneNode(!1);this.centerX=a.pageX;this.centerY=a.pageY;c.style.left=this.centerX-11+"px";c.style.top=this.centerY-11+"px";c.style.pointerEvents="none";c.className="tchPoint";this.id=c.id=b;this[0]=e.body.appendChild(c)}function z(a){var b=g.cloneNode(!1),c=g.cloneNode(!1);b.style.background="#300";c.style.background="#030";b.style.width=b.style.height=c.style.width=c.style.height="16px";c.className=b.className="tchHandle";b.id= "tchSwipe";c.id="tchPR";this[0]=e.body.appendChild(b);this[1]=e.body.appendChild(c);this.move(a);this.draggable(!1)}for(var n=e.createElement("div").style,p=["O","ms","Webkit","Moz",""],q=p.length,r,l,s,d,g,j,k,t=0,i,u,A,o;q--;)if(l=p[q]+(p[q]?"Transition":"transition"),l in n){r=l;break}A=e.createTouch?function(){return e.createTouch.apply(e,arguments)}:function(a,b,c,d,f,B,e,g,h){return{identifier:c,target:b,screenX:B,screenY:e,clientX:g,clientY:h,pageX:d,pageY:f}};o=e.createTouchList?function(a){return e.createTouchList(a)}: function(a){a.identifiedTouch=function(a,c){for(c=this.length;c--;)if(this[c].identifier==a)return this[c]};return a};try{l=e.createEvent("touchevent"),l.initTouchEvent,u=function(a,b,c,d){var f=e.createEvent("touchevent");f.initTouchEvent(a,!0,!0,w,0,b.ctrlKey,b.altKey,b.shiftKey,b.metaKey,c,d,c);return f}}catch(C){u=function(a,b,c,d){var f=e.createEvent("HTMLEvents");f.initEvent(a,!0,!0);f.eventName=a;f.touches=c;f.targetTouches=d;f.changedTouches=c;f.altKey=b.altKey;f.metaKey=b.metaKey;f.ctrlKey= b.ctrlKey;f.shiftKey=b.shiftKey;return f}}n={click:function(a){var b;a.shiftKey&&6>t&&!k&&(d.length()&&(b=d.get(a.pageX,a.pageY))?d.remove(b.id):d.add(a),a.preventDefault());k=m;t=0},mousedown:function(a){var b;if(!a.ctrlKey&&!a.metaKey&&(b=d.get(a.pageX,a.pageY)))j=b,a.shiftKey||(b.down(),b.trigger("touchstart",a)),d.handles&&d.handles.transition(!1),a.preventDefault();else if((a.ctrlKey||a.metaKey)&&"tchHandle"==a.target.className)i="tchSwipe"==a.target.id?[a.pageX,a.pageY]:[0,1],k=a.target.id, a.shiftKey||(d.down(),d.trigger("touchstart",a)),a.preventDefault()},mouseup:function(a){j?(j.inContact&&(j.up(),j.trigger("touchend",a)),d.handles&&d.handles.transition(!0),j=m,a.preventDefault()):k&&(d.inContact&&(d.up(),d.trigger("touchend",a)),a.ctrlKey||a.metaKey||d.handles.draggable(!1),a.preventDefault())},mousemove:function(a){var b,c,v;j?(t++,j.move(a.pageX,a.pageY),d.handles&&d.handles.move(d.center()),j.inContact&&j.trigger("touchmove",a),a.preventDefault()):k&&("tchSwipe"==k?(b=a.pageX- i[0],c=a.pageY-i[1],d.moveBy(b,c),d.handles.move(a.pageX,a.pageY),i=[a.pageX,a.pageY]):(d.handles.moveRP(a.pageX,a.pageY),b=a.pageX-d.handles.centerX,c=a.pageY-d.handles.centerY,v=h.sqrt(b*b+c*c)/100,b=-h.atan2(b,c)+h.PI/2,d.rotate_pinch(b-i[0],(v-i[1])/i[1]),i=[b,v]),d.inContact&&d.trigger("touchmove",a),a.preventDefault())},keypress:function(a){0==a.charCode&&a.shiftKey&&(d.remove(),a.preventDefault())},keydown:function(a){if((17==a.keyCode||224==a.keyCode)&&d.handles)d.handles.draggable(!0),a.preventDefault()}, keyup:function(a){if((17==a.keyCode||224==a.keyCode)&&d.handles&&!k)d.handles.draggable(!1),a.preventDefault()},selectstart:function(a){a.preventDefault()}};g=e.createElement("div");g.style.position="absolute";g.style.display="block";g.style.visibility="visible";g.style.zIndex=999;g.style.margin=g.style.padding=0;g.style.width=g.style.height="20px";g.style.borderRadius="10px";g.style.boxShadow="1px 1px 3px #333";g.style.background="#003";g.style.opacity=0.3;x.prototype={add:function(a){var b="tch"+ h.round(1E6*h.random());this.list[b]=new y(a,b);a=this.length();2==a&&(this.handles=new z(this.center()));2<a&&this.handles.move(this.center())},remove:function(a){var a=a?{a:this.get(a)}:this.list,b;for(b in a)a[b].remove(),delete this.list[a[b].id];length=this.length();2>length&&this.handles&&(this.handles.remove(),this.handles=m);1<length&&this.handles.move(this.center())},get:function(a,b){if(b){var c;this.each(function(d,f){if(a<f.centerX+11&&a>f.centerX-11&&b<f.centerY+11&&b>f.centerY-11)return c= f});return c}return this.list[a.target&&a.target.id||a]},length:function(){return Object.keys(this.list).length},each:function(a){for(var b in this.list)if(a(b,this.list[b]))break},center:function(){var a=1E5,b=0,c=1E5,d=0;this.each(function(f,e){e.centerX>b&&(b=e.centerX);e.centerX<c&&(c=e.centerX);e.centerY>d&&(d=e.centerY);e.centerY<a&&(a=e.centerY)});return[c+(b-c)/2,a+(d-a)/2]},down:function(){this.inContact=!0;this.each(function(a,b){b.down()})},up:function(){this.inContact=!1;this.each(function(a, b){b.up()})},moveBy:function(a,b){this.each(function(c,d){d.move(d.centerX+a,d.centerY+b)})},rotate_pinch:function(a,b){var c,d,f,e,g=this;this.each(function(j,i){c=i.centerX-g.handles.centerX;d=i.centerY-g.handles.centerY;e=-h.atan2(c,d)+h.PI/2+a;f=h.sqrt(c*c+d*d);f+=f*b;i.move(h.cos(e)*f+g.handles.centerX,h.sin(e)*f+g.handles.centerY)})},touchList:function(a,b){var c=[],d=0;this.each(function(f,e){c.push(e.touch(a,b,d++))});return o(c)},trigger:function(a,b){var c=this.touchList(a,b);this.each(function(d, e){e.trigger(a,b,c)})}};y.prototype={remove:function(){e.body.removeChild(this[0])},down:function(){this[0].style.left=this.centerX-10+"px";this[0].style.top=this.centerY-10+"px";this[0].style.boxShadow="none";this[0].style.opacity=0.5;this[0].style.zIndex=1E3;this.inContact=!0},up:function(){this[0].style.left=this.centerX-11+"px";this[0].style.top=this.centerY-11+"px";this[0].style.boxShadow="1px 1px 3px #300";this[0].style.opacity=0.3;this[0].style.zIndex=999;this.inContact=!1},move:function(a, b){this.centerX=a;this.centerY=b;this[0].style.left=a-10+"px";this[0].style.top=b-10+"px"},touch:function(a,b,c){"touchstart"==a&&(this.target=e.elementFromPoint(this.centerX-scrollX,this.centerY-scrollY));return A(w,this.target,c||0,this.centerX,this.centerY,this.centerX+b.screenX-b.pageX,this.centerY+b.screenY-b.pageY,this.centerX+b.clientX-b.pageX,this.centerY+b.clientY-b.pageY)},touchList:function(a,b){return o([this.touch(a,b)])},trigger:function(a,b,c){c||(c=this.touchList(a,b));for(var d=[], e=c.length,g=-1;++g<e;)c[g].target==this.target&&d.push(c[g]);d=o(d);this.target.dispatchEvent(u(a,b,c,d));"touchend"==a&&(this.target=m)}};z.prototype={remove:function(){e.body.removeChild(this[0]);e.body.removeChild(this[1])},move:function(a,b){a.length&&(b=a[1],a=a[0]);this.centerX=a;this.centerY=b;this[0].style.left=this.centerX-11+"px";this[0].style.top=this.centerY-11+"px";this[1].style.left=this.centerX+89+"px";this[1].style.top=this.centerY-11+"px"},moveRP:function(a,b){this[1].style.left= a-11+"px";this[1].style.top=b-11+"px"},draggable:function(a){this[0].style.zIndex=this[1].style.zIndex=a?1E3:998;this[0].style.opacity=this[1].style.opacity=a?0.5:0.15;this.transition(!a)},transition:function(a){this[0].style[r]=this[1].style[r]=a?"top .8s, left .8s":"none"}};d=new x;for(s in n)e.addEventListener(s,n[s],!1)})(window,document,Math);'>Touch Bookmarklet</a></p>
+
+
+<p><em>Try it on this <a href="http://shinydemos.com/picture-organizer/">Picture Organizer</a> or this <a href="https://developer.mozilla.org/media/uploads/demos/b/o/boblemarin/29b9f4169c31634082227192be464765/the-face-builder_1330510088_demo_package/index.html">Face Builder</a>.</em></p>
 
 <br/>
 
 <p>by <a href="http://twitter.com/louis_remi">@louis_remi</a></p>
 
-<a class="github inverted" href="https://github.com/louisremi/touch-devtool">Fork me on Github</a>
+<a id="github" class="inverted" href="https://github.com/louisremi/touch-devtool">Fork me on Github</a>
 
 <script src="touch.bookmarklet.js"></script>
 </body>
