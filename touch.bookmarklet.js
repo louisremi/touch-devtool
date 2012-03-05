@@ -116,9 +116,9 @@ try {
 	};
 }
 
-// this isn't pretty but it improves minification
-function preventDefault( e ) {
+function cancel( e ) {
 	e.preventDefault();
+	e.stopPropagation();
 }
 
 // -- Event Listeners ---------------------------------------
@@ -129,11 +129,12 @@ listeners = {
 		var point;
 
 		if ( e.shiftKey && moveCount < 6 && !draggedHandle ) {
+
 			points.length() && ( point = points.get( e.pageX, e.pageY ) ) ?
 				points.remove( point.id ) :
 				points.add( e );
 
-				preventDefault(e);
+				cancel(e);
 		}
 
 		draggedHandle = undefined;
@@ -158,7 +159,7 @@ listeners = {
 			//  turn off transitions while a point is being dragged
 			points.handles && points.handles.transition( false );
 
-			preventDefault(e);
+			cancel(e);
 
 		// handles logic
 		} else if ( ( e.ctrlKey || e.metaKey )  && e.target.className == "tchHandle" ) {
@@ -173,8 +174,11 @@ listeners = {
 				points.trigger( _touchstart, e );
 			}
 
-			preventDefault(e);
+			cancel(e);
 		}
+
+		// prevent text-selection
+		window.getSelection().removeAllRanges();
 	},
 
 	mouseup: function( e ) {
@@ -194,7 +198,7 @@ listeners = {
 
 			draggedPoint = undefined;
 
-			preventDefault(e);
+			cancel(e);
 
 		// handles logic
 		} else if ( draggedHandle ) {
@@ -214,7 +218,7 @@ listeners = {
 			// this would create a new point everytime the handle is released
 			//draggedPoint = undefined;
 
-			preventDefault(e);
+			cancel(e);
 		}
 	},
 
@@ -233,7 +237,7 @@ listeners = {
 
 			draggedPoint.inContact && draggedPoint.trigger( _touchmove, e );
 
-			preventDefault(e);
+			cancel(e);
 
 		// handles logic
 		} else if ( draggedHandle ) {
@@ -270,40 +274,32 @@ listeners = {
 
 			points.inContact && points.trigger( _touchmove, e );
 
-			preventDefault(e);
-		}
-	},
-
-	// remove all points on Shift+Escape
-	keypress: function( e ) {
-		if ( e.charCode == 0 && e.shiftKey ) {
-			points.remove();
-
-			preventDefault(e);
+			cancel(e);
 		}
 	},
 
 	// activate handles on !Ctrl or !Cmd
 	keydown: function( e ) {
-		if ( ( e.keyCode == 17 || e.keyCode == 224 ) && points.handles ) {
+		// 17 is Ctrl, 224 is Cmd on Firefox, 91 is Cmd on Safari
+		if ( ( e.keyCode == 17 || e.keyCode == 224 || e.keyCode == 91 ) && points.handles ) {
 			points.handles.draggable( true );
 
-			preventDefault(e);
+			cancel(e);
 		}
 	},
 
 	keyup: function( e ) {
-		if ( ( e.keyCode == 17 || e.keyCode == 224 ) && points.handles && !draggedHandle ) {
+		if ( ( e.keyCode == 17 || e.keyCode == 224 || e.keyCode == 91 ) && points.handles && !draggedHandle ) {
 			points.handles.draggable( false );
 			points.handles.move( points.handles.centerX, points.handles.centerY );
 
-			preventDefault(e);
+			cancel(e);
 		}
-	},
 
-	// prevent text selection, because of Chrome
-	selectstart: function( e ) {
-		preventDefault(e);
+		// remove all points on Escape
+		if ( e.keyCode == 27 ) {
+			points.remove();
+		}
 	}
 };
 
@@ -320,7 +316,7 @@ circle.style.width = circle.style.height = "20px";
 circle.style.borderRadius = "10px";
 circle.style.boxShadow = "1px 1px 3px #333";
 circle.style.background = "#003";
-circle.style.opacity = .3;
+circle.style.opacity = .5;
 
 // -- Points ------------------------------------------------
 
@@ -509,7 +505,7 @@ Point.prototype = {
 		this[0].style.left = ( this.centerX - 10 ) + "px";
 		this[0].style.top = ( this.centerY - 10 ) + "px";
 		this[0].style.boxShadow = "none";
-		this[0].style.opacity = .5;
+		this[0].style.opacity = .8;
 		this[0].style.zIndex = 1000;
 
 		this.inContact = true;
@@ -519,7 +515,7 @@ Point.prototype = {
 		this[0].style.left = ( this.centerX - 11 ) + "px";
 		this[0].style.top = ( this.centerY - 11 ) + "px";
 		this[0].style.boxShadow = "1px 1px 3px #300";;
-		this[0].style.opacity = .3;
+		this[0].style.opacity = .5;
 		this[0].style.zIndex = 999;
 
 		this.inContact = false;
@@ -635,7 +631,7 @@ Handles.prototype = {
 
 	draggable: function( bool ) {
 		this[0].style.zIndex = this[1].style.zIndex = ( bool ? 1000 : 998 );
-		this[0].style.opacity = this[1].style.opacity = ( bool ? .5 : .15 );
+		this[0].style.opacity = this[1].style.opacity = ( bool ? .8 : .3 );
 
 		this.transition( !bool );
 	},
@@ -651,7 +647,7 @@ points = new Points();
 
 // Register event listeners
 for ( type in listeners ) {
-	document.addEventListener( type, listeners[ type ], false);
+	document.addEventListener( type, listeners[ type ], true );
 }
 
 })(window,document,Math);
