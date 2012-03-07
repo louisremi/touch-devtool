@@ -8,7 +8,7 @@ var div = document.createElement("div"),
 	transition, tmp,
 	listeners, type,
 	points, circle,
-	draggedPoint, draggedHandle, moveCount = 0, prevData,
+	draggedPoint, draggedHandle, moveCount, prevData,
 	prepareEvent, createTouch, createTouchList;
 
 // -- Vendor Prefix Detection -------------------------------
@@ -138,7 +138,6 @@ listeners = {
 		}
 
 		draggedHandle = undefined;
-		moveCount = 0;
 	},
 
 	mousedown: function( e ) {
@@ -179,6 +178,8 @@ listeners = {
 
 		// prevent text-selection
 		window.getSelection().removeAllRanges();
+
+		moveCount = 0;
 	},
 
 	mouseup: function( e ) {
@@ -631,7 +632,7 @@ Handles.prototype = {
 
 	draggable: function( bool ) {
 		this[0].style.zIndex = this[1].style.zIndex = ( bool ? 1000 : 998 );
-		this[0].style.opacity = this[1].style.opacity = ( bool ? .8 : .3 );
+		this[0].style.opacity = this[1].style.opacity = ( bool ? .6 : .3 );
 
 		this.transition( !bool );
 	},
